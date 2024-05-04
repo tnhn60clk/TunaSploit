@@ -3,6 +3,7 @@ import random
 import signal
 import sys
 import os
+import threading
 
 # Tarama sonuçlarını saklamak için bir sözlük
 tarama_sonuclari = {}
@@ -53,7 +54,7 @@ def nmap_tarama(ip, parametreler=None):
             dirb_calistir = input("80 portu açık algılandı. dirb aracını çalıştırmak ister misiniz? (E/H): ")
             if dirb_calistir.lower() == 'e':
                 dirb_parametreleri = input("dirb için ekstra parametreler girin (örn: -w -l), yoksa boş bırakın: ")
-                dirb_calistir(ip, dirb_parametreleri)
+                threading.Thread(target=dirb_calistir, args=(ip, dirb_parametreleri)).start()
     except subprocess.CalledProcessError as e:
         print(f"Hata: {e}")
 
@@ -63,10 +64,9 @@ def dirb_calistir(ip, parametreleri=None):
     if parametreleri:
         komut += parametreleri.split()
     print(f"{' '.join(komut)} komutu çalıştırılıyor...")
-    sonuc = subprocess.Popen(komut, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    cikti, _ = sonuc.communicate()
-    tarama_sonuclari[ip] = cikti
-    print(cikti)
+    sonuc = subprocess.run(komut, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    tarama_sonuclari[ip] = sonuc.stdout
+    print(sonuc.stdout)
 
 # Metasploit'te arama yap
 def metasploit_arama():
