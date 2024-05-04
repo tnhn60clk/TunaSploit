@@ -3,14 +3,17 @@ import random
 import threading
 import sys
 import os
-
-#Ctrl-c ile session kapanır
-def signal_handler(sig, frame):
-    print('Ctrl-C basıldı, program kapatılıyor...')
-    sys.exit(0)
+import signal
 
 # Tarama sonuçlarını saklamak için bir sözlük
 tarama_sonuclari = {}
+
+# CTRL-C sinyali ile güvenli çıkış yapmak için işleyici
+def signal_handler(sig, frame):
+    print('CTRL-C ile çıkış yapılıyor...')
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
 
 try:
     import readline  # Kullanıcı girdisini iyileştirmek için
@@ -45,7 +48,7 @@ def nmap_tarama(ip, parametreler=None):
     try:
         komut = ['nmap', ip]
         if parametreler:
-            komut = ['nmap'] + parametreler.split() + [ip]
+            komut += parametreler.split() + [ip]
         print(f"{' '.join(komut)} komutu çalıştırılıyor...")
         sonuc = subprocess.check_output(komut, text=True)
         print(sonuc)
@@ -53,52 +56,37 @@ def nmap_tarama(ip, parametreler=None):
             dirb_calistir = input("80 portu açık algılandı. dirb aracını çalıştırmak ister misiniz? (E/H): ")
             if dirb_calistir.lower() == 'e':
                 dirb_parametreleri = input("dirb için ekstra parametreler girin (örn: -w -l), yoksa boş bırakın: ")
-                threading.Thread(target=dirb, args=(ip, dirb_parametreleri)).start()
+                threading.Thread(target=dirb_calistir, args=(ip, dirb_parametreleri)).start()
     except subprocess.CalledProcessError as e:
         print(f"Hata: {e}")
-
-def dirb(ip, parametreleri=None):
-    komut = ['dirb', f"http://{ip}"]
-    if parametreleri:
-        komut += parametreleri.split()
-    print(f"{' '.join(komut)} komutu çalıştırılıyor...")
-    process = subprocess.Popen(komut, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    while True:
-        output = process.stdout.readline()
-        if output == '' and process.poll() is not None:
-            break
-        if output:
-            print(output.strip())
-            sys.stdout.flush()
-    rc = process.poll()
-    return rc
 
 # dirb ile dizin taraması yap ve sonuçları kaydet
-def dirb_calistir(ip, parametreleri=None):
+def dirb_calistir(ip, dirb_parametreleri=None):
     komut = ['dirb', f"http://{ip}"]
-    if parametreleri:
-        komut += parametreleri.split()
+    if dirb_parametreleri:
+        komut += dirb_parametreleri.split()
     print(f"{' '.join(komut)} komutu çalıştırılıyor...")
     process = subprocess.Popen(komut, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    tarama_sonuclari[ip] = []
     while True:
         output = process.stdout.readline()
         if output == '' and process.poll() is not None:
             break
         if output:
+            tarama_sonuclari[ip].append(output.strip())
             print(output.strip())
             sys.stdout.flush()
     rc = process.poll()
     return rc
 
-# Metasploit'te arama yap
-def metasploit_arama():
-    arama_sorgusu = input("Lütfen Metasploit'te aramak istediğiniz versiyonu girin: ")
-    try:
-        print(f"msfconsole -x 'search name:{arama_sorgusu}; exit' komutu çalıştırılıyor...")
-        sonuc = subprocess.check_output(['msfconsole', '-q','-x', f"search name:{arama_sorgusu}; exit"], text=True)
-        print(sonuc)
-    except subprocess.CalledProcessError as e:
-        print(f"Hata: {e}")
+# dirb sonuçlarını okuma fonksiyonu
+def dirb_sonuclari_oku(ip):
+    if ip in tarama_sonuclari:
+        print(f"{ip} için dirb sonuçları:")
+        for sonuc in tarama_sonuclari[ip]:
+            print(sonuc)
+    else:
+        print(f"{ip} için herhangi bir dirb sonucu bulunamadı.")
 
 # TunaSploit shell'i başlat
 def tunasploit_shell():
@@ -106,7 +94,8 @@ def tunasploit_shell():
         '1': 'arp-scan',
         '2': 'nmap taraması',
         '3': 'dirb',
-        '4': 'metasploit taraması'
+        '4': 'metasploit taraması',
+        '5': 'dirb sonuçlarını oku'
     }
     while True:
         komut = input("TunaSploit> ")
@@ -119,6 +108,9 @@ def tunasploit_shell():
         elif komut == 'opsiyon':
             for key, value in opsiyonlar.items():
                 print(f"{key}: {value}")
+        elif komut == '5':
+            hedef_ip = input("Lütfen dirb sonuçlarını okumak istediğiniz hedef IP adresini girin: ")
+            dirb_sonuclari_oku(hedef_ip)
         elif komut in opsiyonlar:
             islem_sec(komut)
         else:
