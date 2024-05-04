@@ -54,12 +54,12 @@ def nmap_tarama(ip, parametreler=None):
             dirb_calistir = input("80 portu açık algılandı. dirb aracını çalıştırmak ister misiniz? (E/H): ")
             if dirb_calistir.lower() == 'e':
                 dirb_parametreleri = input("dirb için ekstra parametreler girin (örn: -w -l), yoksa boş bırakın: ")
-                threading.Thread(target=dirb_calistir, args=(ip, dirb_parametreleri)).start()
+                threading.Thread(target=dirb, args=(ip, dirb_parametreleri)).start()
     except subprocess.CalledProcessError as e:
         print(f"Hata: {e}")
 
 # dirb ile dizin taraması yap ve sonuçları kaydet
-def dirb_calistir(ip, parametreleri=None):
+def dirb(ip, parametreleri=None):
     komut = ['dirb', f"http://{ip}"]
     if parametreleri:
         komut += parametreleri.split()
