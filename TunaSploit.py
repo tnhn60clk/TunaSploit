@@ -5,7 +5,7 @@ import sys
 
 # SIGINT sinyalini yakalamak için bir handler fonksiyonu tanımlayın
 def signal_handler(sig, frame):
-    print('Ctrl-C basıldı, program kapatılıyor...')
+    print('Program kapatılıyor...')
     sys.exit(0)
 
 # SIGINT sinyalini bu handler'a yönlendirin
