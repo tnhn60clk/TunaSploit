@@ -53,7 +53,7 @@ def metasploit_arama():
     arama_sorgusu = input("Lütfen Metasploit'te aramak istediğiniz versiyonu girin: ")
     try:
         print(f"msfconsole -x 'search name:{arama_sorgusu}; exit' komutu çalıştırılıyor...")
-        sonuc = subprocess.run(['msfconsole', '-x', f"search name:{arama_sorgusu}; exit"], text=True, capture_output=True)
+        sonuc = subprocess.run(['msfconsole', '-q','-x', f"search name:{arama_sorgusu}; exit"], text=True, capture_output=True)
         print(sonuc.stdout)
     except subprocess.CalledProcessError as e:
         print(f"Hata: {e.output}")
