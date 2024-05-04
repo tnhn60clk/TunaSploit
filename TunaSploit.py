@@ -2,6 +2,7 @@ import nmap3
 import subprocess
 import re
 import socket
+
 banner = """
 ████████╗██╗   ██╗███╗   ██╗ █████╗ ███████╗██████╗ ██╗      ██████╗ ██╗████████╗
 ╚══██╔══╝██║   ██║████╗  ██║██╔══██╗██╔════╝██╔══██╗██║     ██╔═══██╗██║╚══██╔══╝
@@ -14,7 +15,6 @@ print(banner)
 
 nmap = nmap3.Nmap()
 
-# Ağdaki cihazların IP adreslerini bulma
 def agdaki_cihazlari_bul():
     # Kendi IP adresimizi bul
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -30,23 +30,26 @@ def agdaki_cihazlari_bul():
     cihazlar = nmap.scan_top_ports(ip_listesi, args="-sn")
     
     # Aktif cihazların IP adreslerini listele
-    aktif_cihazlar = [cihaz for cihaz in cihazlar if cihazlar[cihaz]['state']['state'] == 'up']
+    aktif_cihazlar = [cihaz for cihaz in cihazlar if 'state' in cihazlar[cihaz] and cihazlar[cihaz]['state']['state'] == 'up']
     
     return aktif_cihazlar
 
-# Kullanıcıdan seçim yapmasını iste ve IP adresini döndür
 def ip_secimi_yap(aktif_cihazlar):
     # Cihazları numaralandır ve ekrana yazdır
     for num, ip in enumerate(aktif_cihazlar, start=1):
         print(f"{num}: {ip}")
     
     # Kullanıcıdan bir numara seçmesini iste
-    secim = int(input("Lütfen bir cihaz numarası girin: "))
-    
-    # Seçilen IP adresini döndür
-    return aktif_cihazlar[secim - 1]
+    while True:
+        try:
+            secim = int(input("Lütfen bir cihaz numarası girin: "))
+            if 1 <= secim <= len(aktif_cihazlar):
+                return aktif_cihazlar[secim - 1]
+            else:
+                print("Geçersiz numara, lütfen listedeki numaralardan birini girin.")
+        except ValueError:
+            print("Lütfen geçerli bir sayı girin.")
 
-# Agresif tarama ve Metasploit arama fonksiyonu
 def agresif_tarama_ve_metasploit_arama(ip):
     # Agresif tarama yap
     print(f"{ip} adresinde agresif tarama başlatılıyor...")
@@ -64,16 +67,19 @@ def agresif_tarama_ve_metasploit_arama(ip):
             arama_sorgusu = f"{servis_adi} {versiyon}"
             arama_sorgusu = re.escape(arama_sorgusu)
             msf_arama_komutu = f"msfconsole -x 'search name:{arama_sorgusu}; exit'"
-            process = subprocess.Popen(msf_arama_komutu, shell=True, stdout=subprocess.PIPE)
+            process = subprocess.Popen(msf_arama_komutu, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             sonuc, hata = process.communicate()
             if hata:
-                print(f"Hata: {hata}")
+                print(f"Hata: {hata.decode()}")
             else:
                 print(f"Port {port} için bulunan modüller:")
                 print(sonuc.decode())
 
-# Ana fonksiyon
 if __name__ == "__main__":
     aktif_cihazlar = agdaki_cihazlari_bul()
-    secilen_ip = ip_secimi_yap(aktif_cihazlar)
-    agresif_tarama_ve_metasploit_arama(secilen_ip)
+    if aktif_cihazlar:
+        secilen_ip = ip_secimi_yap(aktif_cihazlar)
+        agresif_tarama_ve_metasploit_arama(secilen_ip)
+    else:
+        print("Aktif cihaz bulunamadı.")
+
