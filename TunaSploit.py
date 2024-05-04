@@ -30,33 +30,30 @@ def arp_scan_tara_ve_yazdir():
     except subprocess.CalledProcessError as e:
         print(f"Hata: {e.output}")
 
-def agresif_tarama_ve_metasploit_arama(ip):
-    # Agresif tarama yap
+def agresif_tarama(ip):
+    # Agresif tarama yap ve sonuçları ekrana yazdır
     print(f"{ip} adresinde agresif tarama başlatılıyor...")
     tarama_sonuclari = nmap.nmap_version_detection(ip)
-    
-    # Metasploit'te versiyon bilgilerini ara
-    print("Metasploit'te uygun modüller aranıyor...")
+    print("Tarama Sonuçları:")
     for servis in tarama_sonuclari:
-        port = servis['port']
-        servis_adi = servis['service']['name']
-        if 'product' in servis['service']:
-            versiyon = servis['service']['product']
-            if 'version' in servis['service']:
-                versiyon += " " + servis['service']['version']
-            arama_sorgusu = f"{servis_adi} {versiyon}"
-            arama_sorgusu = re.escape(arama_sorgusu)
-            msf_arama_komutu = f"msfconsole -x 'search name:{arama_sorgusu}; exit'"
-            process = subprocess.Popen(msf_arama_komutu, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            sonuc, hata = process.communicate()
-            if hata:
-                print(f"Hata: {hata.decode()}")
-            else:
-                print(f"Port {port} için bulunan modüller:")
-                print(sonuc.decode())
+        print(f"Port: {servis['port']}, Servis: {servis['service']['name']}, Ürün: {servis['service'].get('product', 'Bilinmiyor')}, Versiyon: {servis['service'].get('version', 'Bilinmiyor')}")
+
+def metasploit_arama():
+    # Kullanıcıdan Metasploit'te arama yapmak istediği versiyonu al
+    arama_sorgusu = input("Lütfen Metasploit'te aramak istediğiniz versiyonu girin: ")
+    arama_sorgusu = re.escape(arama_sorgusu)
+    msf_arama_komutu = f"msfconsole -x 'search name:{arama_sorgusu}; exit'"
+    process = subprocess.Popen(msf_arama_komutu, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    sonuc, hata = process.communicate()
+    if hata:
+        print(f"Hata: {hata.decode()}")
+    else:
+        print("Metasploit Arama Sonuçları:")
+        print(sonuc.decode())
 
 if __name__ == "__main__":
     arp_scan_tara_ve_yazdir()
     # Kullanıcıdan IP adresi al
     secilen_ip = input("Lütfen agresif tarama yapılacak IP adresini girin: ")
-    agresif_tarama_ve_metasploit_arama(secilen_ip)
+    agresif_tarama(secilen_ip)
+    metasploit_arama()
