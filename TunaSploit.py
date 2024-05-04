@@ -124,7 +124,7 @@ def tunasploit_shell():
         elif komut == 'banner':
             banner_yukle()
          elif komut == 'sexy banner':
-            _sexy_banner_yukle()
+            sexy_banner_yukle()
         elif komut == 'opsiyon':
             for key, value in opsiyonlar.items():
                 print(f"{key}: {value}")
