@@ -4,6 +4,9 @@ import signal
 import sys
 import os
 
+# Tarama sonuçlarını saklamak için bir sözlük
+tarama_sonuclari = {}
+
 try:
     import readline  # Kullanıcı girdisini iyileştirmek için
 except ImportError:
@@ -13,15 +16,6 @@ except ImportError:
 def signal_handler(sig, frame):
     print('Ctrl-C basıldı, program kapatılıyor...')
     sys.exit(0)
-
-# SIGTSTP (ctrl-t) sinyalini yakalamak için bir handler fonksiyonu tanımlayın
-def sigtstp_handler(sig, frame):
-    print('Ctrl-T basıldı, TunaSploit shell\'ine geri dönülüyor...')
-    tunasploit_shell()
-
-# SIGINT ve SIGTSTP sinyallerini bu handler'lara yönlendirin
-signal.signal(signal.SIGINT, signal_handler)
-signal.signal(signal.SIGTSTP, sigtstp_handler)
 
 # Ekranı temizleme fonksiyonu
 def clear_screen():
@@ -63,19 +57,16 @@ def nmap_tarama(ip, parametreler=None):
     except subprocess.CalledProcessError as e:
         print(f"Hata: {e}")
 
-# dirb ile dizin taraması yap ve arka planda çalıştır
+# dirb ile dizin taraması yap ve sonuçları kaydet
 def dirb_calistir(ip, parametreleri=None):
     komut = ['dirb', f"http://{ip}"]
     if parametreleri:
         komut += parametreleri.split()
-    print(f"{' '.join(komut)} komutu arka planda çalıştırılıyor...")
-    sonuc = subprocess.Popen(komut, text=True, stdout=subprocess.PIPE)
-    kaydet = input("Çıktıları dosyaya kaydetmek ister misiniz? (E/H): ")
-    if kaydet.lower() == 'e':
-        dosya_adi = input("Lütfen çıktıların kaydedileceği dosya adını girin (örn: sonuclar.txt): ")
-        with open(dosya_adi, 'w') as dosya:
-            for satir in sonuc.stdout:
-                dosya.write(satir)
+    print(f"{' '.join(komut)} komutu çalıştırılıyor...")
+    sonuc = subprocess.Popen(komut, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    cikti, _ = sonuc.communicate()
+    tarama_sonuclari[ip] = cikti
+    print(cikti)
 
 # Metasploit'te arama yap
 def metasploit_arama():
@@ -93,7 +84,8 @@ def tunasploit_shell():
         '1': 'arp-scan',
         '2': 'nmap taraması',
         '3': 'dirb',
-        '4': 'metasploit taraması'
+        '4': 'metasploit taraması',
+        '5': 'dirb sonuçlarını görüntüle'
     }
     while True:
         komut = input("TunaSploit> ")
@@ -106,6 +98,8 @@ def tunasploit_shell():
         elif komut == 'opsiyon':
             for key, value in opsiyonlar.items():
                 print(f"{key}: {value}")
+        elif komut == '5':
+            dirb_sonuclari_goruntule()
         elif komut in opsiyonlar:
             islem_sec(komut)
         else:
@@ -125,6 +119,20 @@ def islem_sec(secim):
         dirb_calistir(hedef_ip, dirb_parametreleri)
     elif secim == '4':
         metasploit_arama()
+
+# dirb sonuçlarını görüntüleme fonksiyonu
+def dirb_sonuclari_goruntule():
+    if not tarama_sonuclari:
+        print("Henüz dirb taraması yapılmadı.")
+        return
+    for index, (ip, sonuc) in enumerate(tarama_sonuclari.items(), start=1):
+        print(f"{index}: {ip}")
+    secim = input("Görüntülemek istediğiniz tarama numarasını girin: ")
+    if secim.isdigit() and int(secim) in range(1, len(tarama_sonuclari) + 1):
+        ip = list(tarama_sonuclari.keys())[int(secim) - 1]
+        print(tarama_sonuclari[ip])
+    else:
+        print("Geçersiz seçim.")
 
 # Ana fonksiyon
 if __name__ == "__main__":
