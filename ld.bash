@@ -13,5 +13,6 @@ pip3 install python3-nmap
 pip3 install subprocess.run
 pip3 install regex
 pip3 install sockets
+pip3 install random
 
 echo "Kütüphaneler başarıyla yüklendi."
