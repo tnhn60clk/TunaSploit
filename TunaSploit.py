@@ -1,37 +1,15 @@
 import subprocess
 import random
 
-# Banner
-bannerlar = ["""
-████████╗██╗   ██╗███╗   ██╗ █████╗ ███████╗██████╗ ██╗      ██████╗ ██╗████████╗
-╚══██╔══╝██║   ██║████╗  ██║██╔══██╗██╔════╝██╔══██╗██║     ██╔═══██╗██║╚══██╔══╝
-   ██║   ██║   ██║██╔██╗ ██║███████║███████╗██████╔╝██║     ██║   ██║██║   ██║   
-   ██║   ██║   ██║██║╚██╗██║██╔══██║╚════██║██╔═══╝ ██║     ██║   ██║██║   ██║   
-   ██║   ╚██████╔╝██║ ╚████║██║  ██║███████║██║     ███████╗╚██████╔╝██║   ██║   
-   ╚═╝    ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝╚═╝     ╚══════╝ ╚═════╝ ╚═╝   ╚═╝   
-                                                                                 """,""" ███████████                                  █████████            ████            ███   █████   
-░█░░░███░░░█                                 ███░░░░░███          ░░███           ░░░   ░░███    
-░   ░███  ░  █████ ████ ████████    ██████  ░███    ░░░  ████████  ░███   ██████  ████  ███████  
-    ░███    ░░███ ░███ ░░███░░███  ░░░░░███ ░░█████████ ░░███░░███ ░███  ███░░███░░███ ░░░███░   
-    ░███     ░███ ░███  ░███ ░███   ███████  ░░░░░░░░███ ░███ ░███ ░███ ░███ ░███ ░███   ░███    
-    ░███     ░███ ░███  ░███ ░███  ███░░███  ███    ░███ ░███ ░███ ░███ ░███ ░███ ░███   ░███ ███
-    █████    ░░████████ ████ █████░░████████░░█████████  ░███████  █████░░██████  █████  ░░█████ 
-   ░░░░░      ░░░░░░░░ ░░░░ ░░░░░  ░░░░░░░░  ░░░░░░░░░   ░███░░░  ░░░░░  ░░░░░░  ░░░░░    ░░░░░  
-                                                         ░███                                    
-                                                         █████                                   
-                                                        ░░░░░                                    """,""" _______  __   __  __    _  _______  _______  _______  ___      _______  ___   _______ 
-|       ||  | |  ||  |  | ||   _   ||       ||       ||   |    |       ||   | |       |
-|_     _||  | |  ||   |_| ||  |_|  ||  _____||    _  ||   |    |   _   ||   | |_     _|
-  |   |  |  |_|  ||       ||       || |_____ |   |_| ||   |    |  | |  ||   |   |   |  
-  |   |  |       ||  _    ||       ||_____  ||    ___||   |___ |  |_|  ||   |   |   |  
-  |   |  |       || | |   ||   _   | _____| ||   |    |       ||       ||   |   |   |  
-  |___|  |_______||_|  |__||__| |__||_______||___|    |_______||_______||___|   |___|  ""","""  .--.            .--.
- """]
-secilenbanner = random.choice(bannerlar)
-print(secilenbanner)
+# Banner yükleme fonksiyonu
+def banner_yukle():
+    with open('banners.txt', 'r', encoding='utf-8') as file:
+        banners = file.read().strip().split('---')
+    secilen_banner = random.choice(banners)
+    print(secilen_banner)
 
+# arp-scan ile ağdaki cihazları tara ve ekrana yazdır
 def arp_scan_tara_ve_yazdir():
-    # arp-scan ile ağdaki cihazları tara ve ekrana yazdır
     try:
         print("arp-scan komutu çalıştırılıyor...")
         sonuc = subprocess.run(['arp-scan', '-l'], text=True, capture_output=True)
@@ -39,8 +17,8 @@ def arp_scan_tara_ve_yazdir():
     except subprocess.CalledProcessError as e:
         print(f"Hata: {e.output}")
 
+# nmap ile agresif tarama yap ve sonuçları ekrana yazdır
 def nmap_agresif_tarama(ip):
-    # nmap ile agresif tarama yap ve sonuçları ekrana yazdır
     try:
         print(f"nmap -A {ip} komutu çalıştırılıyor...")
         sonuc = subprocess.run(['nmap', '-A', ip], text=True, capture_output=True)
@@ -48,8 +26,8 @@ def nmap_agresif_tarama(ip):
     except subprocess.CalledProcessError as e:
         print(f"Hata: {e.output}")
 
+# Metasploit'te arama yap
 def metasploit_arama():
-    # Kullanıcıdan Metasploit'te arama yapmak istediği versiyonu al
     arama_sorgusu = input("Lütfen Metasploit'te aramak istediğiniz versiyonu girin: ")
     try:
         print(f"msfconsole -x 'search name:{arama_sorgusu}; exit' komutu çalıştırılıyor...")
@@ -59,9 +37,8 @@ def metasploit_arama():
         print(f"Hata: {e.output}")
 
 if __name__ == "__main__":
+    banner_yukle()
     arp_scan_tara_ve_yazdir()
-    # Kullanıcıdan hedef IP adresi al
     hedef_ip = input("Lütfen nmap agresif tarama yapılacak hedef IP adresini girin: ")
     nmap_agresif_tarama(hedef_ip)
     metasploit_arama()
-
