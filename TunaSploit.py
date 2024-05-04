@@ -2,6 +2,7 @@ import subprocess
 import random
 import signal
 import sys
+import os
 
 # SIGINT sinyalini yakalamak için bir handler fonksiyonu tanımlayın
 def signal_handler(sig, frame):
@@ -10,6 +11,13 @@ def signal_handler(sig, frame):
 
 # SIGINT sinyalini bu handler'a yönlendirin
 signal.signal(signal.SIGINT, signal_handler)
+
+# Ekranı temizleme fonksiyonu
+def clear_screen():
+    if os.name == 'nt':  # Windows için
+        _ = os.system('cls')
+    else:  # Mac ve Linux için (os.name: 'posix')
+        _ = os.system('clear')
 
 # Banner yükleme fonksiyonu
 def banner_yukle():
@@ -24,6 +32,8 @@ def tunasploit_shell():
         komut = input("TunaSploit> ")
         if komut == 'exit':
             break
+        elif komut == 'clear':
+            clear_screen()
         elif komut == 'banner':
             banner_yukle()
         elif komut == 'opsiyon':
@@ -62,12 +72,18 @@ def nmap_tarama(ip, parametreler=None):
         print(f"Hata: {e.output}")
 
 # dirb ile dizin taraması yap ve arka planda çalıştır
-def dirb_calistir(ip, parametreler=None):
+def dirb_calistir(ip, parametreleri=None):
     komut = ['dirb', f"http://{ip}"]
-    if parametreler:
-        komut += parametreler.split()
+    if parametreleri:
+        komut += parametreleri.split()
     print(f"{' '.join(komut)} komutu arka planda çalıştırılıyor...")
-    subprocess.Popen(komut)
+    sonuc = subprocess.Popen(komut, text=True, stdout=subprocess.PIPE)
+    kaydet = input("Çıktıları dosyaya kaydetmek ister misiniz? (E/H): ")
+    if kaydet.lower() == 'e':
+        dosya_adi = input("Lütfen çıktıların kaydedileceği dosya adını girin (örn: sonuclar.txt): ")
+        with open(dosya_adi, 'w') as dosya:
+            for satir in sonuc.stdout:
+                dosya.write(satir)
 
 # Metasploit'te arama yap
 def metasploit_arama():
