@@ -29,6 +29,11 @@ def clear_screen():
 
 # Program başladığında ekranı temizle
 clear_screen()
+def sexy_banner_yukle():
+    with open('sexyfile.txt', 'r', encoding='utf-8') as file:
+        banners = file.read().strip().split('---')
+    secilen_banner = random.choice(banners)
+    print(secilen_banner)
 
 # Banner yükleme fonksiyonu
 def banner_yukle():
@@ -118,6 +123,8 @@ def tunasploit_shell():
             clear_screen()
         elif komut == 'banner':
             banner_yukle()
+         elif komut == 'sexy banner':
+            _sexy_banner_yukle()
         elif komut == 'opsiyon':
             for key, value in opsiyonlar.items():
                 print(f"{key}: {value}")
