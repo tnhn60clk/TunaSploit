@@ -1,10 +1,16 @@
 import subprocess
 import random
-acılısbanner = """||T |||u |||n |||a |||S |||p |||l |||o |||i |||t ||
-||__|||__|||__|||__|||__|||__|||__|||__|||__|||__||
-|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|
-"""
-print(acılısbanner)
+import signal
+import sys
+
+# SIGINT sinyalini yakalamak için bir handler fonksiyonu tanımlayın
+def signal_handler(sig, frame):
+    print('Ctrl-C basıldı, program kapatılıyor...')
+    sys.exit(0)
+
+# SIGINT sinyalini bu handler'a yönlendirin
+signal.signal(signal.SIGINT, signal_handler)
+
 # Banner yükleme fonksiyonu
 def banner_yukle():
     with open('banners.txt', 'r', encoding='utf-8') as file:
@@ -46,3 +52,4 @@ if __name__ == "__main__":
     hedef_ip = input("Lütfen nmap agresif tarama yapılacak hedef IP adresini girin: ")
     nmap_agresif_tarama(hedef_ip)
     metasploit_arama()
+
