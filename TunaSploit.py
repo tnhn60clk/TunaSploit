@@ -5,7 +5,7 @@ import sys
 
 # SIGINT sinyalini yakalamak için bir handler fonksiyonu tanımlayın
 def signal_handler(sig, frame):
-    print('Program kapatılıyor...')
+    print('Ctrl-C basıldı, program kapatılıyor...')
     sys.exit(0)
 
 # SIGINT sinyalini bu handler'a yönlendirin
@@ -27,11 +27,14 @@ def arp_scan_tara_ve_yazdir():
     except subprocess.CalledProcessError as e:
         print(f"Hata: {e.output}")
 
-# nmap ile agresif tarama yap ve sonuçları ekrana yazdır
-def nmap_agresif_tarama(ip):
+# nmap ile tarama yap ve sonuçları ekrana yazdır
+def nmap_tarama(ip, parametreler=None):
     try:
-        print(f"nmap -A {ip} komutu çalıştırılıyor...")
-        sonuc = subprocess.run(['nmap', '-A', ip], text=True, capture_output=True)
+        komut = ['nmap', ip]
+        if parametreler:
+            komut = ['nmap'] + parametreler.split() + [ip]
+        print(f"{' '.join(komut)} komutu çalıştırılıyor...")
+        sonuc = subprocess.run(komut, text=True, capture_output=True)
         print(sonuc.stdout)
     except subprocess.CalledProcessError as e:
         print(f"Hata: {e.output}")
@@ -49,7 +52,7 @@ def metasploit_arama():
 if __name__ == "__main__":
     banner_yukle()
     arp_scan_tara_ve_yazdir()
-    hedef_ip = input("Lütfen nmap agresif tarama yapılacak hedef IP adresini girin: ")
-    nmap_agresif_tarama(hedef_ip)
+    hedef_ip = input("Lütfen nmap taraması yapılacak hedef IP adresini girin: ")
+    nmap_parametreleri = input("Eğer ekstra nmap taraması parametreleri kullanmak isterseniz girin (örn: -A -T4), yoksa boş bırakın: ")
+    nmap_tarama(hedef_ip, nmap_parametreleri)
     metasploit_arama()
-
