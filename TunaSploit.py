@@ -27,6 +27,9 @@ def clear_screen():
     else:  # Mac ve Linux için (os.name: 'posix')
         _ = os.system('clear')
 
+# Program başladığında ekranı temizle
+clear_screen()
+
 # Banner yükleme fonksiyonu
 def banner_yukle():
     with open('banners.txt', 'r', encoding='utf-8') as file:
@@ -72,7 +75,7 @@ def dirb_calistir(ip, dirb_parametreleri=None):
         output = process.stdout.readline()
         if output == '' and process.poll() is not None:
             break
-        if output:
+        if output and ('+ ' in output):  # Sadece başarılı sonuçları kaydet
             tarama_sonuclari[ip].append(output.strip())
             print(output.strip())
             sys.stdout.flush()
@@ -87,6 +90,16 @@ def dirb_sonuclari_oku(ip):
             print(sonuc)
     else:
         print(f"{ip} için herhangi bir dirb sonucu bulunamadı.")
+
+# Metasploit'te arama yap
+def metasploit_arama():
+    arama_sorgusu = input("Lütfen Metasploit'te aramak istediğiniz versiyonu girin: ")
+    try:
+        print(f"msfconsole -x 'search name:{arama_sorgusu}; exit' komutu çalıştırılıyor...")
+        sonuc = subprocess.check_output(['msfconsole', '-q','-x', f"search name:{arama_sorgusu}; exit"], text=True)
+        print(sonuc)
+    except subprocess.CalledProcessError as e:
+        print(f"Hata: {e}")
 
 # TunaSploit shell'i başlat
 def tunasploit_shell():
