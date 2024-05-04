@@ -14,6 +14,5 @@ pip3 install subprocess.run
 pip3 install regex
 pip3 install sockets
 pip3 install readline
-pip3 install threading
 
 echo "Kütüphaneler başarıyla yüklendi."
