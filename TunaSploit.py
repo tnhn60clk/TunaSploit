@@ -4,6 +4,7 @@ acılısbanner = """||T |||u |||n |||a |||S |||p |||l |||o |||i |||t ||
 ||__|||__|||__|||__|||__|||__|||__|||__|||__|||__||
 |/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|
 """
+print(acılısbanner)
 # Banner yükleme fonksiyonu
 def banner_yukle():
     with open('banners.txt', 'r', encoding='utf-8') as file:
