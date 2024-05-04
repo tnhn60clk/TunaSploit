@@ -7,6 +7,7 @@ acılısbanner = """ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____
 ||T |||u |||n |||a |||S |||p |||l |||o |||i |||t ||
 ||__|||__|||__|||__|||__|||__|||__|||__|||__|||__||
 |/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|"""
+print(acılısbanner)
 # SIGINT sinyalini yakalamak için bir handler fonksiyonu tanımlayın
 def signal_handler(sig, frame):
     print('Ctrl-C basıldı, program kapatılıyor...')
