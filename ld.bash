@@ -12,5 +12,6 @@ echo "nmap3, subprocess ve re kütüphaneleri yükleniyor..."
 pip3 install python3-nmap
 pip3 install subprocess.run
 pip3 install regex
+pip3 install socket
 
 echo "Kütüphaneler başarıyla yüklendi."
