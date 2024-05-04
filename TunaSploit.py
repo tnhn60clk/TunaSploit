@@ -116,7 +116,7 @@ def islem_sec(secim):
     elif secim == '3':
         hedef_ip = input("Lütfen dirb taraması yapılacak hedef IP adresini girin: ")
         dirb_parametreleri = input("dirb için ekstra parametreler girin (örn: -w -l), yoksa boş bırakın: ")
-        dirb_calistir(hedef_ip, dirb_parametreleri)
+        dirb(hedef_ip, dirb_parametreleri)
     elif secim == '4':
         metasploit_arama()
 
