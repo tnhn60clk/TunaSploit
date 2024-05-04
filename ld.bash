@@ -8,10 +8,10 @@ then
 fi
 
 # Gerekli Python kütüphanelerini yükle
-echo "nmap3, subprocess ve re kütüphaneleri yükleniyor..."
+echo "Kütüphaneler yükleniyor..."
 pip3 install python3-nmap
 pip3 install subprocess.run
 pip3 install regex
-pip3 install socket
+pip3 install sockets
 
 echo "Kütüphaneler başarıyla yüklendi."
