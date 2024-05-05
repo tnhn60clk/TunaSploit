@@ -1,6 +1,5 @@
 import subprocess
 import random
-import threading
 import sys
 import os
 import signal
@@ -43,31 +42,58 @@ def banner_yukle():
     secilen_banner = random.choice(banners)
     print(secilen_banner)
 
-# arp-scan ile ağdaki cihazları tara ve ekrana yazdır
-def arp_scan_tara_ve_yazdir():
+# Ağdaki cihazları tara ve ekrana yazdır
+def ag_cihazlarini_tara():
+    print("Lütfen tarama aracını seçin:")
+    print("1: arp-scan")
+    print("2: netdiscover")
+    secim = input("Seçiminiz (1/2): ")
+    if secim == '1':
+        try:
+            print("arp-scan komutu çalıştırılıyor...")
+            sonuc = subprocess.check_output(['arp-scan', '-l'], text=True)
+            print(sonuc)
+        except subprocess.CalledProcessError as e:
+            print(f"Hata: {e}")
+    elif secim == '2':
+        try:
+            print("netdiscover komutu çalıştırılıyor...")
+            sonuc = subprocess.check_output(['netdiscover'], text=True)
+            print(sonuc)
+        except subprocess.CalledProcessError as e:
+            print(f"Hata: {e}")
+
+# Exploit arama fonksiyonu
+def exploit_arama():
+    print("Lütfen arama aracını seçin:")
+    print("1: Metasploit")
+    print("2: Searchsploit")
+    secim = input("Seçiminiz (1/2): ")
+    if secim == '1':
+        metasploit_arama()
+    elif secim == '2':
+        searchsploit_arama()
+
+# Searchsploit ile arama yap
+def searchsploit_arama():
+    arama_sorgusu = input("Lütfen Searchsploit'te aramak istediğiniz terimi girin: ")
     try:
-        print("arp-scan komutu çalıştırılıyor...")
-        sonuc = subprocess.check_output(['arp-scan', '-l'], text=True)
+        print(f"searchsploit {arama_sorgusu} komutu çalıştırılıyor...")
+        sonuc = subprocess.check_output(['searchsploit', arama_sorgusu], text=True)
         print(sonuc)
     except subprocess.CalledProcessError as e:
         print(f"Hata: {e}")
 
-# nmap ile tarama yap ve sonuçları ekrana yazdır
-def nmap_tarama(ip, parametreler=None):
-    try:
-        komut = ['nmap', ip]
-        if parametreler:
-            komut += parametreler.split() + [ip]
-        print(f"{' '.join(komut)} komutu çalıştırılıyor...")
-        sonuc = subprocess.check_output(komut, text=True)
-        print(sonuc)
-        if "80/tcp open" in sonuc:
-            dirb = input("80 portu açık algılandı. dirb aracını çalıştırmak ister misiniz? (E/H): ")
-            if dirb.lower() == 'e':
-                dirb_parametreleri = input("dirb için ekstra parametreler girin (örn: -w -l), yoksa boş bırakın: ")
-                threading.Thread(target=dirb_calistir, args=(ip, dirb_parametreleri)).start()
-    except subprocess.CalledProcessError as e:
-        print(f"Hata: {e}")
+# Dizin taraması yap ve sonuçları kaydet
+def dizin_taramasi(ip):
+    print("Lütfen dizin tarama aracını seçin:")
+    print("1: dirb")
+    print("2: gobuster")
+    secim = input("Seçiminiz (1/2): ")
+    if secim == '1':
+        dirb_calistir(ip)
+    elif secim == '2':
+        gobuster_calistir(ip)
 
 # dirb ile dizin taraması yap ve sonuçları kaydet
 def dirb_calistir(ip, dirb_parametreleri=None):
@@ -82,6 +108,25 @@ def dirb_calistir(ip, dirb_parametreleri=None):
         if output == '' and process.poll() is not None:
             break
         if output and ('+ ' in output):  # Sadece başarılı sonuçları kaydet
+            tarama_sonuclari[ip].append(output.strip())
+            print(output.strip())
+            sys.stdout.flush()
+    rc = process.poll()
+    return rc
+
+# gobuster ile dizin taraması yap ve sonuçları kaydet
+def gobuster_calistir(ip, gobuster_parametreleri=None):
+    komut = ['gobuster', 'dir', '-u', f"http://{ip}"]
+    if gobuster_parametreleri:
+        komut += gobuster_parametreleri.split()
+    print(f"{' '.join(komut)} komutu çalıştırılıyor...")
+    process = subprocess.Popen(komut, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    tarama_sonuclari[ip] = []
+    while True:
+        output = process.stdout.readline()
+        if output == '' and process.poll() is not None:
+            break
+        if output and ('200' in output or '301' in output):  # Sadece başarılı sonuçları kaydet
             tarama_sonuclari[ip].append(output.strip())
             print(output.strip())
             sys.stdout.flush()
@@ -110,11 +155,11 @@ def metasploit_arama():
 # TunaSploit shell'i başlat
 def tunasploit_shell():
     opsiyonlar = {
-        '1': 'arp-scan',
-        '2': 'nmap taraması',
-        '3': 'dirb',
-        '4': 'metasploit taraması',
-        '5': 'dirb sonuçlarını oku'
+        '1': 'Ağdaki cihazları tarama:',
+        '2': 'Port tarayıcı:',
+        '3': 'Dizin taraması',
+        '4': 'Explotations search',
+        '5': 'Kayıt alanı'
     }
     while True:
         komut = input("TunaSploit> ")
@@ -124,7 +169,7 @@ def tunasploit_shell():
             clear_screen()
         elif komut == 'banner':
             banner_yukle()
-        elif komut == 'sexy banner':
+        elif komut == 'sexy_banner':
             sexy_banner_yukle()
         elif komut == 'opsiyon':
             for key, value in opsiyonlar.items():
@@ -140,17 +185,35 @@ def tunasploit_shell():
 # İşlem seçme fonksiyonu
 def islem_sec(secim):
     if secim == '1':
-        arp_scan_tara_ve_yazdir()
+        ag_cihazlarini_tara()
     elif secim == '2':
         hedef_ip = input("Lütfen nmap taraması yapılacak hedef IP adresini girin: ")
         nmap_parametreleri = input("Eğer ekstra nmap taraması parametreleri kullanmak isterseniz girin (örn: -A -T4), yoksa boş bırakın: ")
         nmap_tarama(hedef_ip, nmap_parametreleri)
     elif secim == '3':
-        hedef_ip = input("Lütfen dirb taraması yapılacak hedef IP adresini girin: ")
-        dirb_parametreleri = input("dirb için ekstra parametreler girin (örn: -w -l), yoksa boş bırakın: ")
-        dirb_calistir(hedef_ip, dirb_parametreleri)
+        hedef_ip = input("Lütfen dizin taraması yapılacak hedef IP adresini girin: ")
+        dizin_taramasi(hedef_ip)
     elif secim == '4':
-        metasploit_arama()
+               exploit_arama()
+    else:
+        print(f"'{secim}' için bir işlem tanımlanmamış.")
+
+# nmap ile tarama yap ve sonuçları ekrana yazdır
+def nmap_tarama(ip, parametreler=None):
+    try:
+        komut = ['nmap', ip]
+        if parametreler:
+            komut += parametreler.split() + [ip]
+        print(f"{' '.join(komut)} komutu çalıştırılıyor...")
+        sonuc = subprocess.check_output(komut, text=True)
+        print(sonuc)
+        if "80/tcp open" in sonuc:
+            dirb = input("80 portu açık algılandı. dirb aracını çalıştırmak ister misiniz? (E/H): ")
+            if dirb.lower() == 'e':
+                dirb_parametreleri = input("dirb için ekstra parametreler girin (örn: -w -l), yoksa boş bırakın: ")
+                dirb_calistir(ip, dirb_parametreleri)
+    except subprocess.CalledProcessError as e:
+        print(f"Hata: {e}")
 
 # Ana fonksiyon
 if __name__ == "__main__":
