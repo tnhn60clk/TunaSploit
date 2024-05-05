@@ -158,8 +158,7 @@ def tunasploit_shell():
         '1': 'Ağdaki cihazları tarama:',
         '2': 'Port tarayıcı:',
         '3': 'Dizin taraması',
-        '4': 'Explotations search',
-        '5': 'Kayıt alanı'
+        '4': 'Explotations search'
     }
     while True:
         komut = input("TunaSploit> ")
@@ -169,7 +168,7 @@ def tunasploit_shell():
             clear_screen()
         elif komut == 'banner':
             banner_yukle()
-        elif komut == 'sexy banner':
+        elif komut == 'sexy_banner':
             sexy_banner_yukle()
         elif komut == 'opsiyon':
             for key, value in opsiyonlar.items():
