@@ -37,17 +37,11 @@ def sexy_banner_yukle():
     print(secilen_banner)
 
 # Banner yükleme fonksiyonu
-def banner_yukle(dosya_adi):
-    """
-    Belirtilen dosya adındaki bannerları yükler ve rastgele birini gösterir.
-    """
-    try:
-        with open(dosya_adi, 'r', encoding='utf-8') as file:
-            banners = file.read().strip().split('---')
-        secilen_banner = random.choice(banners)
-        print(secilen_banner)
-    except FileNotFoundError:
-        print(f"{dosya_adi} bulunamadı.")
+def banner_yukle():
+    with open('banners.txt', 'r', encoding='utf-8') as file:
+        banners = file.read().strip().split('---')
+    secilen_banner = random.choice(banners)
+    print(secilen_banner)
 
 # Ağdaki cihazları tara ve ekrana yazdır
 def ag_cihazlarini_tara():
@@ -196,7 +190,7 @@ def tunasploit_shell():
             clear_screen()
         elif komut == 'banner':
             banner_yukle()
-        elif komut == 'sexy_banner':
+        elif komut == 'sexy banner':
             sexy_banner_yukle()
         elif komut == 'opsiyon':
             for key, value in opsiyonlar.items():
