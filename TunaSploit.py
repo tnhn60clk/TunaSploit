@@ -1,8 +1,8 @@
+import os
+import signal
 import subprocess
 import random
 import sys
-import os
-import signal
 
 # Tarama sonuçlarını saklamak için bir sözlük
 tarama_sonuclari = {}
@@ -10,14 +10,15 @@ tarama_sonuclari = {}
 # CTRL-C sinyali ile güvenli çıkış yapmak için işleyici
 def signal_handler(sig, frame):
     print('CTRL-C ile çıkış yapılıyor...')
-    sys.exit(0)
-
-signal.signal(signal.SIGINT, signal_handler)
+    os._exit(0)
 
 try:
     import readline  # Kullanıcı girdisini iyileştirmek için
 except ImportError:
     pass  # readline modülü bazı sistemlerde mevcut olmayabilir
+
+
+signal.signal(signal.SIGINT, signal_handler)
 
 # Ekranı temizleme fonksiyonu
 def clear_screen():
@@ -28,7 +29,7 @@ def clear_screen():
 
 # Program başladığında ekranı temizle
 clear_screen()
-
+#sürpriz
 def sexy_banner_yukle():
     with open('sexyfile.txt', 'r', encoding='utf-8') as file:
         banners = file.read().strip().split('---')
@@ -36,11 +37,38 @@ def sexy_banner_yukle():
     print(secilen_banner)
 
 # Banner yükleme fonksiyonu
-def banner_yukle():
-    with open('banners.txt', 'r', encoding='utf-8') as file:
-        banners = file.read().strip().split('---')
-    secilen_banner = random.choice(banners)
-    print(secilen_banner)
+def banner_yukle(dosya_adi):
+    """
+    Belirtilen dosya adındaki bannerları yükler ve rastgele birini gösterir.
+    """
+    try:
+        with open(dosya_adi, 'r', encoding='utf-8') as file:
+            banners = file.read().strip().split('---')
+        secilen_banner = random.choice(banners)
+        print(secilen_banner)
+    except FileNotFoundError:
+        print(f"{dosya_adi} bulunamadı.")
+
+# Ağdaki cihazları tara ve ekrana yazdır
+def ag_cihazlarini_tara():
+    print("Lütfen tarama aracını seçin:")
+    print("1: arp-scan")
+    print("2: netdiscover")
+    secim = input("Seçiminiz (1/2): ")
+    if secim == '1':
+        try:
+            print("arp-scan komutu çalıştırılıyor...")
+            sonuc = subprocess.run(['arp-scan', '-l'], capture_output=True, text=True)
+            print(sonuc.stdout)
+        except subprocess.CalledProcessError as e:
+            print(f"Hata: {e}")
+    elif secim == '2':
+        try:
+            print("netdiscover komutu çalıştırılıyor...")
+            sonuc = subprocess.run(['netdiscover'], capture_output=True, text=True)
+            print(sonuc.stdout)
+        except subprocess.CalledProcessError as e:
+            print(f"Hata: {e}")
 
 # Ağdaki cihazları tara ve ekrana yazdır
 def ag_cihazlarini_tara():
